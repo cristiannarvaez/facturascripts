@@ -1,0 +1,289 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-info-circle fa-fw"></i> Estado en DIAN - Factura {{ fsc.views.DianStatus.model.codigo }}
+                </div>
+                <div class="card-body">
+                    {% if fsc.views.DianStatus.dianData %}
+                        {% set dian = fsc.views.DianStatus.dianData %}
+                        <div class="row">
+                            <!-- Información de envío -->
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-paper-plane"></i> Información de Envío</h6>
+                                <table class="table table-sm table-striped">
+                                    <tr>
+                                        <td><strong>Estado:</strong></td>
+                                        <td>
+                                            <span class="badge badge-{{ dian.getStatusClass() }}">
+                                                {{ dian.getStatusName() }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>CUFE:</strong></td>
+                                        <td>
+                                            {% if dian.cufe %}
+                                                <code style="font-size: 11px;">{{ dian.cufe|slice(0, 32) }}{% if dian.cufe|length > 32 %}...{% endif %}</code>
+                                                <button class="btn btn-sm btn-outline-secondary ml-1" onclick="copyToClipboard('{{ dian.cufe }}')" title="Copiar CUFE completo">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            {% else %}
+                                                <em class="text-muted">No generado</em>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% if dian.cude %}
+                                    <tr>
+                                        <td><strong>CUDE:</strong></td>
+                                        <td><code style="font-size: 11px;">{{ dian.cude|slice(0, 32) }}{% if dian.cude|length > 32 %}...{% endif %}</code></td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr>
+                                        <td><strong>Fecha Envío:</strong></td>
+                                        <td>
+                                            {% if dian.fecha_envio %}
+                                                {{ dian.fecha_envio }}
+                                            {% else %}
+                                                <em class="text-muted">No enviado</em>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Intentos:</strong></td>
+                                        <td>
+                                            <span class="badge badge-{{ dian.intentos > 2 ? 'danger' : (dian.intentos > 0 ? 'warning' : 'success') }}">
+                                                {{ dian.intentos }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                {% if dian.error_message %}
+                                <div class="alert alert-danger mt-3">
+                                    <h6><i class="fas fa-exclamation-triangle"></i> Error Reportado:</h6>
+                                    <small>{{ dian.error_message }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Código QR y acciones -->
+                            <div class="col-md-6">
+                                {% if dian.qr_code %}
+                                <div class="text-center mb-3">
+                                    <h6><i class="fas fa-qrcode"></i> Código QR</h6>
+                                    <img src="{{ dian.qr_code }}" class="img-fluid border" style="max-width: 200px;" alt="QR Code DIAN">
+                                </div>
+                                {% endif %}
+
+                                <h6><i class="fas fa-tools"></i> Acciones Disponibles</h6>
+                                <div class="btn-group-vertical d-block">
+                                    {% if dian.canBeResent() %}
+                                    <button type="submit" name="action" value="send-to-dian" class="btn btn-success btn-sm mb-2">
+                                        <i class="fas fa-paper-plane"></i> 
+                                        {% if dian.intentos > 0 %}Reenviar{% else %}Enviar{% endif %} a DIAN
+                                    </button>
+                                    {% endif %}
+
+                                    {% if dian.xml or dian.xml_signed %}
+                                    <button type="submit" name="action" value="download-xml-dian" class="btn btn-info btn-sm mb-2">
+                                        <i class="fas fa-download"></i> Descargar XML
+                                    </button>
+                                    {% endif %}
+
+                                    <button type="submit" name="action" value="generate-pdf-dian" class="btn btn-warning btn-sm mb-2">
+                                        <i class="fas fa-file-pdf"></i> Generar PDF DIAN
+                                    </button>
+
+                                    {% if dian.cufe %}
+                                    <button class="btn btn-secondary btn-sm" onclick="queryDianStatus('{{ dian.cufe }}')">
+                                        <i class="fas fa-sync"></i> Consultar Estado
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información técnica (colapsable) -->
+                        <div class="mt-4">
+                            <button class="btn btn-outline-secondary btn-sm" data-toggle="collapse" data-target="#technicalInfo">
+                                <i class="fas fa-code"></i> Ver Información Técnica
+                            </button>
+                            
+                            <div class="collapse mt-2" id="technicalInfo">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Datos de Creación</h6>
+                                                <table class="table table-sm">
+                                                    <tr>
+                                                        <td><strong>Creado:</strong></td>
+                                                        <td>{{ dian.created_at }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Actualizado:</strong></td>
+                                                        <td>{{ dian.updated_at }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>ID DIAN:</strong></td>
+                                                        <td>{{ dian.id }}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Estado del XML</h6>
+                                                <table class="table table-sm">
+                                                    <tr>
+                                                        <td><strong>XML Generado:</strong></td>
+                                                        <td>
+                                                            {% if dian.xml %}
+                                                                <span class="badge badge-success">Sí</span>
+                                                                <small>({{ (dian.xml|length / 1024)|round(1) }} KB)</small>
+                                                            {% else %}
+                                                                <span class="badge badge-secondary">No</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>XML Firmado:</strong></td>
+                                                        <td>
+                                                            {% if dian.xml_signed %}
+                                                                <span class="badge badge-success">Sí</span>
+                                                                <small>({{ (dian.xml_signed|length / 1024)|round(1) }} KB)</small>
+                                                            {% else %}
+                                                                <span class="badge badge-secondary">No</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Código QR:</strong></td>
+                                                        <td>
+                                                            {% if dian.qr_code %}
+                                                                <span class="badge badge-success">Generado</span>
+                                                            {% else %}
+                                                                <span class="badge badge-secondary">No</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <!-- Factura no enviada -->
+                        <div class="text-center py-4">
+                            <i class="fas fa-file-invoice fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Esta factura no ha sido enviada a DIAN</h5>
+                            
+                            {% if fsc.views.DianStatus.validation %}
+                                {% set validation = fsc.views.DianStatus.validation %}
+                                {% if validation.valid %}
+                                    <div class="alert alert-success mt-3">
+                                        <i class="fas fa-check-circle"></i> <strong>Factura lista para envío</strong>
+                                        <p class="mb-0">{{ validation.message }}</p>
+                                    </div>
+                                    
+                                    <button type="submit" name="action" value="send-to-dian" class="btn btn-success mt-2">
+                                        <i class="fas fa-paper-plane"></i> Enviar a DIAN
+                                    </button>
+                                {% else %}
+                                    <div class="alert alert-warning mt-3">
+                                        <i class="fas fa-exclamation-triangle"></i> <strong>Factura requiere correcciones:</strong>
+                                        <ul class="mb-0 mt-2 text-left">
+                                            {% for error in validation.errors %}
+                                            <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+
+                                {% if validation.warnings %}
+                                    <div class="alert alert-info mt-3">
+                                        <i class="fas fa-info-circle"></i> <strong>Advertencias:</strong>
+                                        <ul class="mb-0 mt-2 text-left">
+                                            {% for warning in validation.warnings %}
+                                            <li>{{ warning }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Estado de configuración DIAN -->
+                    {% if fsc.views.DianStatus.dianConfig %}
+                        {% set config = fsc.views.DianStatus.dianConfig %}
+                        <div class="mt-4 pt-3 border-top">
+                            <h6><i class="fas fa-cog"></i> Estado de Configuración DIAN</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <strong>Ambiente:</strong> 
+                                        <span class="badge badge-{{ config.ambiente == 'produccion' ? 'success' : 'warning' }}">
+                                            {{ config.ambiente|title }}
+                                        </span>
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <strong>NIT Emisor:</strong> {{ config.nit }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger mt-4">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <strong>Configuración DIAN no encontrada</strong>
+                            <p class="mb-0">Configure DIAN en Administración > Configuración DIAN</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Mostrar mensaje de confirmación
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success position-fixed';
+        toast.style.top = '20px';
+        toast.style.right = '20px';
+        toast.style.zIndex = '9999';
+        toast.innerHTML = '<i class="fas fa-check"></i> CUFE copiado al portapapeles';
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Error copiando texto: ', err);
+        alert('CUFE: ' + text);
+    });
+}
+
+function queryDianStatus(cufe) {
+    // Implementar consulta de estado via AJAX
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando...';
+    
+    // Simular consulta (aquí iría la llamada AJAX real)
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync"></i> Consultar Estado';
+        // Recargar página para mostrar estado actualizado
+        location.reload();
+    }, 2000);
+}
+</script>

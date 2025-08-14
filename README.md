@@ -1,39 +1,15 @@
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/NeorazorX/facturascripts/issues?utf8=✓&q=is%3Aopen%20is%3Aissue)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/NeoRazorX/facturascripts/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/NeoRazorX/facturascripts/?branch=master)
+# DianFactCol – Plugin DIAN Colombia 100% Homologado
 
-# FacturaScripts
-Open source ERP software. Built on modern PHP and bootstrap 4. Easy and powerful.
+## ✅ Características
+- XML UBL 2.1 oficial DIAN  
+- Firma digital con certificado .p12  
+- CUFE/CUDE correcto  
+- QR DIAN oficial  
+- Envío SOAP con Guzzle  
+- PDF FESC-01 con QR  
+- Logs y validaciones completas  
 
-## Install
-Clone and deploy with composer and npm (composer is for PHP dependencies, and npm for JavaScript and CSS):
-```
-git clone https://github.com/NeoRazorX/facturascripts.git
-cd facturascripts
-composer install
-npm install
-```
-
-## Documentation
-https://facturascripts.com/ayuda
-
-## Issues / Feedback
-https://facturascripts.com/contacto
-
-### Security Vulnerabilities
-If you discover a security vulnerability within FacturaScripts, please send an e-mail to Carlos Garcia via [carlos@facturascripts.com](mailto:carlos@facturascripts.com)
-
-## Translations
-https://facturascripts.com/traducciones
-
-## Tests
-```
-vendor/bin/phpunit
-vendor/bin/phpstan analyse Core
-```
-
-## Links
-- [Curso de FacturaScripts 2021](https://www.youtube.com/watch?v=rGopZA3ErzE&list=PLNxcJ5CWZ8V6nfeVu6vieKI_d8a_ObLfY)
-- [Programa para hacer facturas gratis](https://facturascripts.com/programa-para-hacer-facturas)
-- [Programa para hacer presupuestos gratis](https://facturascripts.com/programa-de-presupuestos)
-- [Programa de contabilidad gratis para autónomos](https://facturascripts.com/software-contabilidad)
-- [Programa para imprimir tickets](https://facturascripts.com/remote-printer)
+## 🚀 Instalación
+1. Copiar carpeta `DianFactCol` en `Plugins/`
+2. `composer install`
+3. Activar desde **Administración → Plugins**
